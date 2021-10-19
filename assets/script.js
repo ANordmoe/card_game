@@ -59,13 +59,26 @@ class Board {
         d.createDeck();
         d.shuffleDeck();    
         this.players[0].playerCards = d.cards.slice(0, 26);
-        this.players[1].playerCards = d.cards.slice(27, 51);      
-    }
+        this.players[1].playerCards = d.cards.slice(27, 51); 
+        let player1 = this.players[0];
+        let player2 = this.players[1];
+        return (player1,player2);
+    }    
 }
 
 let gameBoard = new Board();
-gameBoard.start("p1","p2");
+gameBoard.start("p1", "p2");
 
-function drawCard(){
+let player1 = gameBoard.players[0]
+let player2 = gameBoard.players[1]
 
+
+function compareCards(p1, p2){
+    if (p1 > p2) {
+        console.log("p1 wins") //executed if condition1 is true
+      } else if (p1 < p2) {
+        console.log("p2 wins") //executed if the condition1 is false and condition2 is true
+      } else {
+        console.log("a tie!") //executed if the condition1 is false and condition2 is false
+      }
 }
