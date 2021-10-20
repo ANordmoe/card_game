@@ -24,7 +24,7 @@ const text = document.querySelector(".text")
 
 let playerDeck, computerDeck, inRound, stop
 
-document.addEventListener("click", () => {
+playerDeckElement.addEventListener("click", () => {
   if (stop) {
     startGame()
     return
@@ -63,8 +63,8 @@ function cleanBeforeRound() {
 function flipCards() {
   inRound = true
 
-  const playerCard = playerDeck.cards.pop()
-  const computerCard = computerDeck.pop()
+  let playerCard = playerDeck.cards.pop()
+  let computerCard = computerDeck.pop()
 
   playerCardSlot.appendChild(playerCard.getHTML())
   computerCardSlot.appendChild(computerCard.getHTML())
