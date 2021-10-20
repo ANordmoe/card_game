@@ -1,84 +1,110 @@
-class Card {
-    constructor(suit, rank, value) {
-        this.suit = suit;  
-        this.rank = rank;      
-        this.value = value;
-    }
+import Deck from "./deck.js"
+
+const CARD_VALUE_MAP = {
+  "2": 2,
+  "3": 3,
+  "4": 4,
+  "5": 5,
+  "6": 6,
+  "7": 7,
+  "8": 8,
+  "9": 9,
+  "10": 10,
+  J: 11,
+  Q: 12,
+  K: 13,
+  A: 14
 }
 
-class Deck {
-    constructor() {
-        this.cards = [];    
-    }
-                       
-    createDeck() {
-        let suits = ['clubs', 'diamonds', 'hearts', 'spades'];
-        let ranks = ['ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king'];
-        let values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-        
-        for (let i = 0; i < suits.length; i++) {
-            for (let j = 0; j < ranks.length; j++) {
-                this.cards.push(new Card(suits[i], ranks[j], values[j]));
-            }
-        }
-    }
-    shuffleDeck() {
-        let location1, location2, tmp;
-        for (let i = 0; i < 1000; i++) {
-            location1 = Math.floor((Math.random() * this.cards.length));
-            location2 = Math.floor((Math.random() * this.cards.length));
-            tmp = this.cards[location1];
-            this.cards[location1] = this.cards[location2];
-            this.cards[location2] = tmp;
-        }
-    }
+const computerCardSlot = document.querySelector(".computer-card-slot")
+const playerCardSlot = document.querySelector(".player-card-slot")
+const computerDeckElement = document.querySelector(".computer-deck")
+const playerDeckElement = document.querySelector(".player-deck")
+const text = document.querySelector(".text")
+
+let playerDeck, computerDeck, inRound, stop
+
+document.addEventListener("click", () => {
+  if (stop) {
+    startGame()
+    return
+  }
+
+  if (inRound) {
+    cleanBeforeRound()
+  } else {
+    flipCards()
+  }
+})
+
+startGame()
+function startGame() {
+  const deck = new Deck()
+  deck.shuffle()
+
+  const deckMidpoint = Math.ceil(deck.numberOfCards / 2)
+  playerDeck = new Deck(deck.cards.slice(0, deckMidpoint))
+  computerDeck = new Deck(deck.cards.slice(deckMidpoint, deck.numberOfCards))
+  inRound = false
+  stop = false
+
+  cleanBeforeRound()
 }
 
-let deck = new Deck();
+function cleanBeforeRound() {
+  inRound = false
+  computerCardSlot.innerHTML = ""
+  playerCardSlot.innerHTML = ""
+  text.innerText = ""
 
-deck.createDeck();       // calling our function to fill our array
-console.log(deck.cards); // logging our cards array [this.cards]
-
-class Player {
-    constructor(name) {
-        this.playerName = name;
-        this.playerCards = [];
-    }
+  updateDeckCount()
 }
 
-class Board {
-    constructor() {
-        this.cardsInMiddle = [];
-        this.players = [];
-    }
+function flipCards() {
+  inRound = true
 
-    start(playerOneName, playerTwoName) {
-        this.players.push(new Player(playerOneName));
-        this.players.push(new Player(playerTwoName));
-        let d = new Deck();
-        d.createDeck();
-        d.shuffleDeck();    
-        this.players[0].playerCards = d.cards.slice(0, 26);
-        this.players[1].playerCards = d.cards.slice(27, 51); 
-        let player1 = this.players[0];
-        let player2 = this.players[1];
-        return (player1,player2);
-    }    
+  const playerCard = playerDeck.cards.pop()
+  const computerCard = computerDeck.pop()
+
+  playerCardSlot.appendChild(playerCard.getHTML())
+  computerCardSlot.appendChild(computerCard.getHTML())
+
+  updateDeckCount()
+
+  if (isRoundWinner(playerCard, computerCard)) {
+    text.innerText = "Win"
+    playerDeck.push(playerCard)
+    playerDeck.push(computerCard)
+  } else if (isRoundWinner(computerCard, playerCard)) {
+    text.innerText = "Lose"
+    computerDeck.push(playerCard)
+    computerDeck.push(computerCard)
+  } else {
+    text.innerText = "Draw"
+    playerDeck.push(playerCard)
+    computerDeck.push(computerCard)
+  }
+
+  if (isGameOver(playerDeck)) {
+    text.innerText = "You Lose!!"
+    stop = true
+  } else if (isGameOver(computerDeck)) {
+    text.innerText = "You Win!!"
+    stop = true
+  }
+
 }
 
-let gameBoard = new Board();
-gameBoard.start("p1", "p2");
-
-let player1 = gameBoard.players[0]
-let player2 = gameBoard.players[1]
-
-
-function compareCards(p1, p2){
-    if (p1 > p2) {
-        console.log("p1 wins") //executed if condition1 is true
-      } else if (p1 < p2) {
-        console.log("p2 wins") //executed if the condition1 is false and condition2 is true
-      } else {
-        console.log("a tie!") //executed if the condition1 is false and condition2 is false
-      }
+function updateDeckCount() {
+  computerDeckElement.innerText = computerDeck.numberOfCards
+  playerDeckElement.innerText = playerDeck.numberOfCards
 }
+
+function isRoundWinner(cardOne, cardTwo) {
+  return CARD_VALUE_MAP[cardOne.value] > CARD_VALUE_MAP[cardTwo.value]
+}
+
+function isGameOver(deck) {
+  return deck.numberOfCards === 0
+}
+
